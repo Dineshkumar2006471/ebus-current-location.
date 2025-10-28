@@ -8,5 +8,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@dataconnect/generated": "file:src/dataconnect-generated",
+    "firebase": "^12.4.0"
+  }
 }

@@ -1,0 +1,262 @@
+
+/* Mobile-First Design System */
+:root {
+  /* Core spacing units */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+
+  /* Typography */
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 24px;
+  --font-size-xxl: 32px;
+
+  /* Border radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Touch targets */
+  --touch-target-size: 48px;
+  --touch-target-small: 44px;
+
+  /* Safe areas */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+}
+
+/* Base Mobile Styles */
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-overflow-scrolling: touch;
+  overflow-x: hidden;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+}
+
+/* Mobile Navigation */
+.nav-toggle {
+  position: fixed;
+  top: calc(var(--safe-area-inset-top) + var(--spacing-md));
+  right: var(--spacing-md);
+  width: var(--touch-target-size);
+  height: var(--touch-target-size);
+  border-radius: 50%;
+  background: var(--glass-strong);
+  border: none;
+  color: white;
+  z-index: 1001;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Sidebar for Mobile */
+.sidebar {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Main Content Area */
+.main {
+  padding: var(--spacing-md);
+  padding-top: calc(var(--safe-area-inset-top) + var(--spacing-md));
+  padding-bottom: calc(var(--safe-area-inset-bottom) + var(--spacing-md));
+}
+
+/* Card Design */
+.card {
+  background: var(--glass-strong);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  border: 1px solid var(--glass);
+}
+
+/* Form Elements */
+input,
+select,
+textarea,
+.btn {
+  height: var(--touch-target-size);
+  padding: 0 var(--spacing-md);
+  font-size: var(--font-size-base);
+  border-radius: var(--radius-sm);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+/* Grid Layouts */
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+/* Table Responsiveness */
+.table-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 calc(-1 * var(--spacing-md));
+  padding: 0 var(--spacing-md);
+}
+
+/* Menu Overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 999;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  display: none;
+}
+
+/* Responsive Breakpoints */
+@media (max-width: 1024px) {
+  .nav-toggle {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 280px;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.active {
+    transform: translateX(0);
+  }
+
+  .main {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Grid adjustments */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Header adjustments */
+  .header {
+    flex-direction: column;
+    gap: var(--spacing-md);
+  }
+
+  /* Form layout */
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Better spacing */
+  .card {
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+  }
+
+  /* Enhanced touch targets */
+  .nav-item,
+  .action-item {
+    min-height: var(--touch-target-size);
+    padding: 0 var(--spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-md: 12px;
+    --radius-md: 8px;
+  }
+
+  .main {
+    padding: var(--spacing-md);
+  }
+
+  .card {
+    padding: var(--spacing-md);
+  }
+
+  h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .btn {
+    height: var(--touch-target-small);
+  }
+}
+
+/* iPhone Specific */
+@supports (-webkit-touch-callout: none) {
+  .main {
+    padding-bottom: calc(var(--safe-area-inset-bottom) + var(--spacing-xl));
+  }
+
+  input, select, textarea {
+    font-size: 16px; /* Prevent zoom on focus */
+  }
+}
+
+/* Android Specific */
+@supports not (-webkit-touch-callout: none) {
+  input, select, textarea {
+    font-size: var(--font-size-base);
+  }
+}
+
+/* High Refresh Rate Screens */
+@media (prefers-reduced-motion: no-preference) {
+  .sidebar,
+  .btn,
+  .card {
+    transition-duration: 0.2s;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+  }
+}

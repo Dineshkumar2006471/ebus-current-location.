@@ -1,0 +1,1657 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>All Buses — E-Bus Manager</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --accent1: #0ea5e9;
+      --accent2: #8b5cf6;
+      --accent3: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --muted: #94a3b8;
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --glass-hover: rgba(255,255,255,0.15);
+      --shadow: 0 8px 32px rgba(0,0,0,0.2);
+      --glow: 0 0 20px rgba(14,165,233,0.15);
+      --gradient-bg: linear-gradient(135deg, rgba(14,165,233,0.15) 0%, rgba(139,92,246,0.15) 100%);
+      --sidebar-width: 280px;
+      --header-height: 70px;
+      --content-padding: 2rem;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(14,165,233,0.2), transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(139,92,246,0.2), transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(6,182,212,0.1), transparent 30%),
+        var(--bg1);
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54 0h6v6h-6zM0 54h6v6H0z' fill='%23ffffff' fill-opacity='0.02'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Logo and Sidebar */
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .logo-text h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo-text .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      position: fixed;
+      height: 100vh;
+      color: white;
+      border-right: 1px solid var(--glass);
+      z-index: 1000;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--gradient-bg);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .sidebar nav {
+      padding: 0.5rem 0.75rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 10px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 480px) {
+      .nav-item {
+        padding: 0.75rem 1rem;
+        margin: 0.125rem 0;
+      }
+
+      .nav-item .nav-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255,255,255,0.05);
+        border-radius: 8px;
+        font-size: 1.125rem;
+      }
+
+      .nav-item.active {
+        background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      }
+
+      .nav-item.active .nav-icon {
+        background: rgba(255,255,255,0.1);
+      }
+    }
+
+    .nav-item .nav-icon {
+      background: var(--glass);
+      padding: 0.5rem;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item:hover .nav-icon {
+      background: var(--glass-hover);
+      transform: scale(1.1);
+    }
+
+    .nav-item::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 0;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border-radius: 0 4px 4px 0;
+      transition: height 0.3s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--glass);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .nav-item:hover::before {
+      height: 70%;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+    }
+
+    .nav-icon {
+      font-size: 1.25rem;
+      opacity: 0.8;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: var(--content-padding);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    /* Enhanced Bus Grid and Cards */
+    .buses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .bus-card {
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 14px;
+      padding: 1.25rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 1px solid var(--glass);
+      position: relative;
+      overflow: hidden;
+    }
+
+    @media (max-width: 480px) {
+      .buses-grid {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+        padding: 0;
+      }
+
+      .bus-card {
+        margin: 0;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.95);
+      }
+
+      .bus-card .bus-header {
+        padding-bottom: 0.875rem;
+        margin-bottom: 0.875rem;
+      }
+
+      .bus-card .bus-info {
+        gap: 0.75rem;
+        font-size: 0.9375rem;
+      }
+
+      .bus-card .bus-actions {
+        padding-top: 0.875rem;
+        margin-top: 0.875rem;
+      }
+
+      .bus-card .bus-actions .btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 42px;
+        font-size: 0.875rem;
+        border-radius: 10px;
+      }
+    }
+
+    .bus-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .bus-card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .bus-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow), var(--glow);
+      border-color: var(--glass-hover);
+    }
+
+    .bus-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow);
+    }
+
+    .bus-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .bus-id {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--accent1);
+    }
+
+    .bus-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      background: var(--glass);
+    }
+
+    .status-active {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .status-inactive {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    /* Enhanced Form Styles */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+
+    @media (max-width: 480px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 0.875rem;
+      }
+
+      .form-group input {
+        height: 48px;
+        font-size: 16px;
+        padding: 0 1rem;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid var(--glass);
+        border-radius: 10px;
+        color: white;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .form-group input:focus {
+        border-color: var(--accent1);
+        box-shadow: 0 0 0 1px var(--accent1);
+        outline: none;
+      }
+
+      .form-group label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--muted);
+        margin-left: 0.25rem;
+      }
+    }
+
+    .form-group label {
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .form-group input {
+      background: var(--glass);
+      border: 1px solid var(--glass-hover);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent1);
+      box-shadow: 0 0 0 2px rgba(14,165,233,0.2);
+    }
+
+    .form-group input::placeholder {
+      color: var(--muted);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--glass);
+    }
+
+    .add-bus-card {
+      animation: slideDown 0.5s ease-out;
+      background: var(--glass-strong);
+      border-radius: 16px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      border: 1px solid var(--glass);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Bus Info */
+    .bus-info {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .info-value {
+      color: white;
+    }
+
+    .bus-actions {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--glass);
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    /* Enhanced Buttons */
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.9375rem;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    @media (max-width: 480px) {
+      .btn {
+        padding: 0 1rem;
+        height: 42px;
+        font-size: 0.875rem;
+        width: 100%;
+      }
+
+      .btn.primary {
+        background: linear-gradient(135deg, var(--accent1), var(--accent2));
+        color: white;
+        box-shadow: 0 2px 10px rgba(14,165,233,0.2);
+      }
+
+      .btn.secondary {
+        background: rgba(255,255,255,0.05);
+        color: white;
+        border: 1px solid var(--glass);
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+        margin-top: 1rem;
+      }
+
+      .form-actions .btn {
+        margin: 0;
+      }
+    }
+
+    .btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: -100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: 0.5s;
+    }
+
+    .btn:hover::after {
+      left: 100%;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+      box-shadow: 0 4px 15px rgba(14,165,233,0.3);
+    }
+
+    .btn.secondary {
+      background: var(--glass);
+      color: white;
+      border: 1px solid var(--glass-hover);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    .bus-status {
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.2);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .status-active::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #34d399;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+    }
+
+    .btn.secondary {
+      background: var(--glass);
+      color: white;
+    }
+
+    .btn.muted {
+      background: var(--glass);
+      color: var(--muted);
+      border: 1px solid var(--glass-hover);
+    }
+
+    .btn.muted:hover {
+      color: white;
+      background: var(--glass-hover);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .btn.small {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    /* Enhanced Mobile Navigation */
+    .nav-toggle {
+      display: none;
+      position: fixed;
+      top: 0.5rem;
+      right: 0.5rem;
+      z-index: 2000;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border: none;
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      -webkit-tap-highlight-color: transparent;
+      pointer-events: auto;
+    }
+
+    .nav-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .close-nav {
+      display: flex;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--glass);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.25rem;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.8;
+      transition: all 0.2s ease;
+    }
+
+    .close-nav:active {
+      transform: scale(0.95);
+      opacity: 1;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1500;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* Loading Animation */
+    .loading {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        var(--accent1),
+        var(--accent2),
+        var(--accent3),
+        var(--accent2),
+        var(--accent1)
+      );
+      background-size: 200% 100%;
+      animation: loading 2s infinite;
+      z-index: 1000;
+      box-shadow: 0 0 10px rgba(14,165,233,0.5);
+    }
+
+    /* Error States */
+    .error-state {
+      text-align: center;
+      padding: 2rem;
+      background: var(--glass);
+      border-radius: 12px;
+      margin: 1rem 0;
+    }
+
+    .error-state p {
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .error-state .retry-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .error-state .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    .loading-spinner {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      border: 3px solid var(--glass);
+      border-radius: 50%;
+      border-top-color: var(--accent1);
+      animation: spin 1s linear infinite;
+      margin: 1rem 0;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes loading {
+      0% { 
+        background-position: 100% 50%;
+        transform: scaleX(0);
+      }
+      50% { 
+        transform: scaleX(1);
+      }
+      100% { 
+        background-position: -100% 50%;
+        transform: scaleX(0);
+      }
+    }
+
+    /* Smooth Scrollbar */
+    .main::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    .main::-webkit-scrollbar-track {
+      background: var(--glass);
+      border-radius: 4px;
+    }
+
+    .main::-webkit-scrollbar-thumb {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border-radius: 4px;
+    }
+
+    .main::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    }
+
+    /* Card Entrance Animation */
+    .bus-card {
+      animation: cardEntrance 0.3s ease-out;
+      animation-fill-mode: backwards;
+    }
+
+    @keyframes cardEntrance {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .bus-card:nth-child(1) { animation-delay: 0.1s; }
+    .bus-card:nth-child(2) { animation-delay: 0.2s; }
+    .bus-card:nth-child(3) { animation-delay: 0.3s; }
+    .bus-card:nth-child(4) { animation-delay: 0.4s; }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      :root {
+        --content-padding: 1.5rem;
+      }
+
+      .buses-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-width: 0;
+        --content-padding: 0.75rem;
+      }
+
+      body {
+        overflow-x: hidden;
+        background: var(--bg1);
+      }
+
+      .main {
+        margin: 0;
+        padding-top: 2rem !important;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 85%;
+        max-width: 300px;
+        height: 100vh;
+        top: 0;
+        left: 0;
+        position: fixed;
+        border-radius: 0;
+        background: rgba(15, 23, 42, 0.98);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        z-index: 1600;
+        visibility: hidden;
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        box-shadow: 0 0 40px rgba(0,0,0,0.3);
+        visibility: visible;
+      }
+
+      .sidebar .logo-container {
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        height: 60px;
+      }
+
+      .nav-toggle {
+        display: flex;
+        top: 0.5rem;
+      }
+
+      .buses-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .page-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      .bus-header {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+      }
+
+      .bus-info {
+        gap: 1rem;
+      }
+
+      .bus-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .bus-actions .btn {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        justify-content: center;
+      }
+
+      /* Improve touch targets */
+      .nav-item {
+        padding: 1rem;
+        min-height: 44px;
+      }
+
+      .nav-toggle {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .btn {
+        min-height: 44px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      :root {
+        --content-padding: 0.5rem;
+      }
+
+      .main {
+        padding: var(--content-padding);
+      }
+
+      .page-header {
+        padding: 0.75rem;
+        margin: 0 0 1rem 0;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 0.25rem;
+      }
+
+      .add-bus-card {
+        margin: 0 0 1rem 0;
+        padding: 1rem;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid var(--glass);
+      }
+
+      .form-group input {
+        padding: 0.625rem;
+        font-size: 0.875rem;
+      }
+
+      .bus-card {
+        border-radius: 12px;
+      }
+
+      .bus-id {
+        font-size: 1.125rem;
+      }
+
+      .bus-info {
+        font-size: 0.875rem;
+      }
+
+      .btn {
+        padding: 0.625rem 1rem;
+        font-size: 0.875rem;
+      }
+
+      .bus-actions .btn {
+        flex: 1;
+        min-width: 100%;
+      }
+    }
+
+    /* Enhanced Mobile Styles */
+    @media (max-width: 480px) {
+      .main {
+        padding: 0.75rem;
+      }
+
+      .page-header {
+        margin-top: 1rem;
+      }
+
+      .page-header h1 {
+        font-size: 1.5rem;
+      }
+
+      .add-bus-card {
+        padding: 1rem;
+        margin: 0.5rem;
+        border-radius: 12px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .form-group input {
+        height: 44px;
+        font-size: 16px; /* Prevents iOS zoom on focus */
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .btn {
+        width: 100%;
+        height: 44px;
+        padding: 0 1rem;
+        font-size: 0.875rem;
+        justify-content: center;
+      }
+
+      .buses-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+        padding: 0.5rem;
+      }
+
+      .bus-card {
+        padding: 1rem;
+        border-radius: 12px;
+        margin-bottom: 0.75rem;
+      }
+
+      .bus-header {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+      }
+
+      .bus-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .bus-actions .btn {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+        font-size: 0.813rem;
+      }
+
+      /* Improve touch targets */
+      .nav-item,
+      .btn,
+      .bus-status,
+      .form-group input {
+        min-height: 44px;
+      }
+
+      /* Smooth transitions */
+      .sidebar {
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .sidebar-overlay {
+        transition: opacity 0.3s ease;
+      }
+
+      /* Loading animation */
+      .loading-animation {
+        height: 3px;
+        background: linear-gradient(90deg, 
+          var(--accent1),
+          var(--accent2),
+          var(--accent3)
+        );
+        background-size: 200% 100%;
+        animation: loading 2s infinite;
+      }
+
+      @keyframes loading {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-animation" id="loading"></div>
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle Navigation">☰</button>
+  <div class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="/images/ebus-logo.svg" alt="E-Bus" class="logo-img">
+      <div class="logo-text">
+        <h2>E-Bus Manager</h2>
+        <span class="subtitle">Admin Dashboard</span>
+      </div>
+      <button class="close-nav" id="closeNav" aria-label="Close Navigation">✕</button>
+    </div>
+    <nav>
+      <a href="/admin.html" class="nav-item">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </a>
+      <a href="/manage-drivers.html" class="nav-item">
+        <span class="nav-icon">👥</span>
+        Manage Drivers
+      </a>
+      <a href="/all-buses.html" class="nav-item active">
+        <span class="nav-icon">🚍</span>
+        All Buses
+      </a>
+      <a href="/live-tracking.html" class="nav-item">
+        <span class="nav-icon">📍</span>
+        Live Tracking
+      </a>
+    </nav>
+  </div>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Bus Fleet Management</h1>
+    </div>
+
+    <section class="card add-bus-card">
+      <div class="card-header">
+        <h3>Add New Bus</h3>
+        <span class="nav-icon">🚌</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="bus_id">Bus ID</label>
+          <input id="bus_id" placeholder="Enter unique ID (e.g. bus-1001)" />
+        </div>
+        <div class="form-group">
+          <label for="bus_number">Bus Number</label>
+          <input id="bus_number" placeholder="Enter plate number" />
+        </div>
+        <div class="form-group">
+          <label for="bus_driver">Assigned Driver</label>
+          <input id="bus_driver" placeholder="Driver ID (optional)" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button id="saveBus" class="btn primary">
+          <span class="btn-icon">💾</span>
+          Save Bus
+        </button>
+        <button id="clearBus" class="btn muted">
+          <span class="btn-icon">🔄</span>
+          Clear Form
+        </button>
+      </div>
+    </section>
+
+    <section class="card buses-list-card">
+      <div class="card-header">
+        <h3>Registered Buses</h3>
+        <div class="card-actions">
+          <button id="refreshBuses" class="btn muted">
+            <span class="btn-icon">🔄</span>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div id="busesList" class="buses-grid">
+        <!-- Sample bus card (will be replaced by dynamic content) -->
+        <div class="bus-card">
+          <div class="bus-header">
+            <div class="bus-id">Bus #1234</div>
+            <div class="bus-status status-active">Active</div>
+          </div>
+          <div class="bus-info">
+            <div class="info-item">
+              <span>Driver</span>
+              <span class="info-value">John Doe</span>
+            </div>
+            <div class="info-item">
+              <span>Route</span>
+              <span class="info-value">Downtown Express</span>
+            </div>
+            <div class="info-item">
+              <span>Last Updated</span>
+              <span class="info-value">2 mins ago</span>
+            </div>
+          </div>
+          <div class="bus-actions">
+            <button class="btn secondary small">
+              <span class="btn-icon">✏️</span>
+              Edit
+            </button>
+            <button class="btn secondary small">
+              <span class="btn-icon">🗑️</span>
+              Remove
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { auth, db } from "./js/firebaseConfig.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import {
+      doc, setDoc, collection, onSnapshot, serverTimestamp, deleteDoc, getDoc, updateDoc
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    function $(id) { return document.getElementById(id); }
+
+    // Format timestamp to relative time
+    function formatRelativeTime(timestamp) {
+      if (!timestamp) return '-';
+      const now = new Date();
+      const date = new Date(timestamp.toMillis());
+      const diff = Math.floor((now - date) / 1000); // difference in seconds
+
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + ' mins ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+      return date.toLocaleDateString();
+    }
+
+    // Create a bus card element
+    function createBusCard(id, data) {
+      const card = document.createElement('div');
+      card.className = 'bus-card';
+      card.innerHTML = `
+        <div class="bus-header">
+          <div class="bus-id">Bus #${id}</div>
+          <div class="bus-status ${data.isActive ? 'status-active' : ''}">${data.isActive ? 'Active' : 'Inactive'}</div>
+        </div>
+        <div class="bus-info">
+          <div class="info-item">
+            <span>Bus Number</span>
+            <span class="info-value">${data.busNumber || '-'}</span>
+          </div>
+          <div class="info-item">
+            <span>Driver ID</span>
+            <span class="info-value">${data.driverId || 'Unassigned'}</span>
+          </div>
+          <div class="info-item">
+            <span>Last Updated</span>
+            <span class="info-value">${formatRelativeTime(data.updatedAt)}</span>
+          </div>
+        </div>
+        <div class="bus-actions">
+          <button class="btn secondary small edit-btn" data-id="${id}">
+            <span class="btn-icon">✏️</span>
+            Edit
+          </button>
+          <button class="btn secondary small view-btn" data-id="${id}">
+            <span class="btn-icon">📍</span>
+            Track
+          </button>
+          <button class="btn secondary small del-btn" data-id="${id}">
+            <span class="btn-icon">🗑️</span>
+            Remove
+          </button>
+        </div>
+      `;
+      return card;
+    }
+
+    // Mobile Navigation Setup
+    function setupMobileNavigation() {
+      const navToggle = document.getElementById('navToggle');
+      const sidebar = document.getElementById('sidebar');
+      const closeNav = document.getElementById('closeNav');
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      // Create and insert overlay right after the nav toggle
+      let overlay = document.querySelector('.sidebar-overlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        navToggle.insertAdjacentElement('afterend', overlay);
+      }
+
+      function showSidebar() {
+        requestAnimationFrame(() => {
+          sidebar.classList.add('active');
+          overlay.classList.add('active');
+          document.body.style.overflow = 'hidden';
+        });
+      }
+
+      function hideSidebar() {
+        requestAnimationFrame(() => {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+          document.body.style.overflow = '';
+        });
+      }
+
+      // Toggle menu
+      navToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        showSidebar();
+      });
+      
+      closeNav.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideSidebar();
+      });
+      
+      overlay.addEventListener('click', (e) => {
+        e.preventDefault();
+        hideSidebar();
+      });
+
+      // Swipe handling
+      document.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+      });
+
+      document.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].clientX;
+        handleSwipe();
+      });
+
+      function handleSwipe() {
+        const swipeDistance = touchEndX - touchStartX;
+        const threshold = 100;
+
+        if (Math.abs(swipeDistance) >= threshold) {
+          if (swipeDistance > 0 && touchStartX < 50) {
+            if (!sidebar.classList.contains('active')) {
+              toggleSidebar();
+            }
+          } else if (swipeDistance < 0 && sidebar.classList.contains('active')) {
+            toggleSidebar();
+          }
+        }
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      setupMobileNavigation();
+      
+      const idInput = $("bus_id");
+      const numberInput = $("bus_number");
+      const driverInput = $("bus_driver");
+      const saveBtn = $("saveBus");
+      const clearBtn = $("clearBus");
+      const refreshBtn = $("refreshBuses");
+      const listDiv = $("busesList");
+      let unsubscribe = null;
+
+      // Show loading animation
+      const showLoading = () => {
+        const loader = document.querySelector('.loading');
+        if (loader) loader.style.display = 'block';
+      };
+
+      // Hide loading animation
+      const hideLoading = () => {
+        const loader = document.querySelector('.loading');
+        if (loader) loader.style.display = 'none';
+      };
+
+      // Subscribe to buses collection
+      let retryCount = 0;
+      const MAX_RETRIES = 5;
+      const RETRY_DELAY = 3000; // 3 seconds
+
+      async function checkConnectivity() {
+        try {
+          // Try to get a small document to test connectivity
+          await getDoc(doc(db, "system", "status"));
+          return true;
+        } catch (error) {
+          console.warn("Connectivity check failed:", error);
+          return false;
+        }
+      }
+
+      async function subscribeToBuses() {
+        if (unsubscribe) {
+          unsubscribe();
+          unsubscribe = null;
+        }
+
+        if (retryCount >= MAX_RETRIES) {
+          hideLoading();
+          listDiv.innerHTML = `
+            <div class="error-state">
+              <p>Connection failed. Please check your internet connection and try again.</p>
+              <button class="btn primary retry-btn">Retry</button>
+            </div>
+          `;
+          document.querySelector('.retry-btn')?.addEventListener('click', () => {
+            retryCount = 0;
+            subscribeToBuses();
+          });
+          return;
+        }
+
+        showLoading();
+
+        try {
+          // Check connectivity before subscribing
+          const isConnected = await checkConnectivity();
+          if (!isConnected) {
+            throw new Error("No connectivity");
+          }
+
+          unsubscribe = onSnapshot(collection(db, "buses"), (snap) => {
+            retryCount = 0; // Reset retry count on successful connection
+            hideLoading();
+            listDiv.innerHTML = "";
+            
+            if (snap.empty) {
+              listDiv.innerHTML = `
+                <div class="empty-state">
+                  <p>No buses registered yet.</p>
+                </div>
+              `;
+              return;
+            }
+
+          snap.docs.forEach(doc => {
+            const data = doc.data();
+            const card = createBusCard(doc.id, data);
+            listDiv.appendChild(card);
+          });
+
+          // Add event listeners to buttons
+          setupButtonListeners();
+        }, async (error) => {
+          console.error("Error fetching buses:", error);
+          hideLoading();
+          
+          // Check if it's a network error
+          if (error.code === 'unavailable' || error.code === 'resource-exhausted' || error.message.includes('network')) {
+            retryCount++;
+            listDiv.innerHTML = `
+              <div class="error-state">
+                <p>Connection error. Retrying... (Attempt ${retryCount}/${MAX_RETRIES})</p>
+                <div class="loading-spinner"></div>
+              </div>
+            `;
+            
+            // Wait before retrying
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+            subscribeToBuses();
+          } else {
+            listDiv.innerHTML = `
+              <div class="error-state">
+                <p>Error loading buses. Please try again.</p>
+                <button class="btn primary retry-btn">Retry</button>
+              </div>
+            `;
+            document.querySelector('.retry-btn')?.addEventListener('click', () => {
+              retryCount = 0;
+              subscribeToBuses();
+            });
+          }
+        });
+      } catch (error) {
+        console.error("Subscribe error:", error);
+        retryCount++;
+        hideLoading();
+        
+        await new Promise(resolve => setTimeout(resolve, RETRY_DELAY));
+        subscribeToBuses();
+      }
+      }
+
+      // Setup button event listeners
+      function setupButtonListeners() {
+        // Delete buttons
+        listDiv.querySelectorAll(".del-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm(`Are you sure you want to remove bus #${id}?`)) return;
+            
+            try {
+              showLoading();
+              await deleteDoc(doc(db, "buses", id));
+              hideLoading();
+            } catch (error) {
+              console.error("Error deleting bus:", error);
+              hideLoading();
+              alert("Failed to delete bus. Please try again.");
+            }
+          };
+        });
+
+        // View/Track buttons
+        listDiv.querySelectorAll(".view-btn").forEach(btn => {
+          btn.onclick = () => {
+            const id = btn.dataset.id;
+            window.location.href = `/live-tracking.html?focus=${encodeURIComponent(id)}`;
+          };
+        });
+
+        // Edit buttons
+        listDiv.querySelectorAll(".edit-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            try {
+              showLoading();
+              const busDoc = await getDoc(doc(db, "buses", id));
+              hideLoading();
+              
+              if (busDoc.exists()) {
+                const data = busDoc.data();
+                idInput.value = id;
+                numberInput.value = data.busNumber || '';
+                driverInput.value = data.driverId || '';
+                idInput.disabled = true; // Prevent ID modification during edit
+                saveBtn.textContent = '💾 Update Bus';
+                
+                // Scroll to form
+                document.querySelector('.add-bus-card').scrollIntoView({ behavior: 'smooth' });
+              }
+            } catch (error) {
+              console.error("Error fetching bus details:", error);
+              hideLoading();
+              alert("Failed to load bus details. Please try again.");
+            }
+          };
+        });
+      }
+
+      // Save/Update bus
+      saveBtn.addEventListener("click", async () => {
+        const id = idInput.value.trim();
+        if (!id) {
+          alert("Please enter a bus ID");
+          return;
+        }
+
+        try {
+          showLoading();
+          const payload = {
+            busNumber: numberInput.value.trim() || null,
+            driverId: driverInput.value.trim() || null,
+            updatedAt: serverTimestamp(),
+            isActive: true // Set as active by default when creating/updating
+          };
+
+          await setDoc(doc(db, "buses", id), payload, { merge: true });
+          hideLoading();
+          
+          // Reset form
+          clearBtn.click();
+          idInput.disabled = false;
+          saveBtn.textContent = '💾 Save Bus';
+          alert("Bus saved successfully!");
+        } catch (error) {
+          console.error("Error saving bus:", error);
+          hideLoading();
+          alert("Failed to save bus. Please try again.");
+        }
+      });
+
+      // Clear form
+      clearBtn.addEventListener("click", () => {
+        idInput.value = "";
+        numberInput.value = "";
+        driverInput.value = "";
+        idInput.disabled = false;
+        saveBtn.textContent = '💾 Save Bus';
+      });
+
+      // Refresh bus list
+      refreshBtn.addEventListener("click", () => {
+        subscribeToBuses();
+      });
+
+      // Check authentication and initialize
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = "/login.html";
+          return;
+        }
+        subscribeToBuses();
+      });
+
+      // Mobile navigation toggle
+      document.getElementById('navToggle').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
+      });
+
+      // Loading animation
+      window.addEventListener('load', () => {
+        const loader = document.querySelector('.loading');
+        if (loader) loader.style.display = 'none';
+      });
+    });
+  </script>
+</body>
+</html>

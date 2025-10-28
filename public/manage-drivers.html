@@ -1,0 +1,1034 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Manage Drivers — Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg1: #0f172a;
+      --accent1: #0ea5e9;
+      --accent2: #8b5cf6;
+      --accent3: #06b6d4;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --muted: #94a3b8;
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --glass-hover: rgba(255,255,255,0.15);
+      --shadow: 0 8px 32px rgba(0,0,0,0.2);
+      --glow: 0 0 20px rgba(14,165,233,0.15);
+      --gradient-bg: linear-gradient(135deg, rgba(14,165,233,0.15) 0%, rgba(139,92,246,0.15) 100%);
+      --sidebar-width: 280px;
+      --header-height: 70px;
+      --content-padding: 2rem;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: 
+        radial-gradient(circle at 0% 0%, rgba(14,165,233,0.2), transparent 50%),
+        radial-gradient(circle at 100% 100%, rgba(139,92,246,0.2), transparent 50%),
+        radial-gradient(circle at 100% 0%, rgba(6,182,212,0.1), transparent 30%),
+        var(--bg1);
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54 0h6v6h-6zM0 54h6v6H0z' fill='%23ffffff' fill-opacity='0.02'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .sidebar {
+      width: var(--sidebar-width);
+      background: rgba(15, 23, 42, 0.98);
+      backdrop-filter: blur(12px);
+      position: fixed;
+      height: 100vh;
+      color: white;
+      border-right: 1px solid var(--glass);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .logo-text h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo-text .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .sidebar nav {
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      color: var(--muted);
+      text-decoration: none;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+
+    .nav-item:hover {
+      background: var(--glass);
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+    }
+
+    .main {
+      flex: 1;
+      margin-left: var(--sidebar-width);
+      padding: var(--content-padding);
+    }
+
+    .card {
+      background: var(--glass-strong);
+      backdrop-filter: blur(12px);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--glass);
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent1), var(--accent2));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover::before {
+      transform: scaleX(1);
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow), var(--glow);
+      border-color: var(--glass-hover);
+    }
+
+    .row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      color: var(--muted);
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+
+    input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid var(--glass);
+      border-radius: 8px;
+      background: rgba(255,255,255,0.05);
+      color: white;
+      font-size: 1rem;
+    }
+
+    input::placeholder {
+      color: var(--muted);
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--accent1);
+      box-shadow: 0 0 0 3px rgba(14,165,233,0.2);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .card-header h3 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--accent1);
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-icon {
+      margin-right: 0.5rem;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn.primary {
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      color: white;
+      box-shadow: 0 4px 15px rgba(14,165,233,0.3);
+    }
+
+    .btn.muted {
+      background: var(--glass);
+      color: white;
+      border: 1px solid var(--glass-hover);
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--glow);
+    }
+
+    .btn-icon {
+      font-size: 1.25rem;
+      transition: transform 0.3s ease;
+    }
+
+    .btn:hover .btn-icon {
+      transform: scale(1.1);
+    }
+
+    .drivers-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .driver-card {
+      background: var(--glass);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .driver-card:hover {
+      transform: translateY(-4px);
+      background: var(--glass-strong);
+    }
+
+    .driver-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .driver-name {
+      font-weight: 600;
+      font-size: 1.125rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .driver-contact {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .driver-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      background: var(--glass);
+    }
+
+    .driver-status.active {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    .driver-details {
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .detail-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .detail-label {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .detail-value {
+      font-weight: 500;
+    }
+
+    .driver-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+    }
+
+    .btn.small {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-width: 0px;
+        --content-padding: 1rem;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+        width: 280px;
+      }
+
+      .nav-toggle {
+        display: block;
+      }
+
+      .row {
+        flex-direction: column;
+      }
+    }
+
+    /* Enhanced Mobile Navigation */
+    .nav-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1001;
+      background: var(--glass-strong);
+      border: 1px solid var(--glass);
+      color: white;
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1.5rem;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+    }
+
+    .nav-toggle:hover {
+      background: var(--glass-hover);
+      border-color: var(--accent1);
+    }
+
+    .close-nav {
+      display: none;
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: var(--glass);
+      border: none;
+      color: white;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      backdrop-filter: blur(4px);
+    }
+
+    /* Loading Animation */
+    .loading-animation {
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, 
+        var(--accent1),
+        var(--accent2),
+        var(--accent3)
+      );
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1002;
+      background-size: 200% 100%;
+      animation: loading 2s infinite;
+    }
+
+    @keyframes loading {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    /* Enhanced Mobile Responsiveness */
+    @media (max-width: 768px) {
+      :root {
+        --sidebar-width: 0px;
+        --content-padding: 1rem;
+      }
+
+      body {
+        overflow-x: hidden;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+        width: 100%;
+        max-width: 300px;
+        height: 100vh;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .sidebar.active ~ .sidebar-overlay {
+        display: block;
+        opacity: 1;
+      }
+
+      .nav-toggle {
+        display: flex;
+      }
+
+      .close-nav {
+        display: flex;
+      }
+
+      .main {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+      }
+
+      .page-header {
+        padding-top: 4rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card {
+        margin: 0.5rem;
+        padding: 1rem;
+        border-radius: 12px;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .form-group input {
+        height: 44px;
+        font-size: 16px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .form-actions .btn {
+        width: 100%;
+        height: 44px;
+        justify-content: center;
+      }
+
+      .drivers-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        padding: 0.5rem;
+      }
+
+      .driver-card {
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .driver-header {
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .driver-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+
+      .driver-actions .btn {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
+      }
+
+      /* Improve touch targets */
+      .nav-item,
+      .btn,
+      .driver-status {
+        min-height: 44px;
+      }
+
+      .driver-details {
+        font-size: 0.875rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="loading-animation" id="loading"></div>
+  <button class="nav-toggle" id="navToggle">☰</button>
+  
+  <div class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="/images/ebus-logo.svg" alt="E-Bus" class="logo-img">
+      <div class="logo-text">
+        <h2>E-Bus Manager</h2>
+        <span class="subtitle">Admin Dashboard</span>
+      </div>
+      <button class="close-nav" id="closeNav">✕</button>
+    </div>
+    <nav>
+      <a href="/admin.html" class="nav-item">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </a>
+      <a href="/manage-drivers.html" class="nav-item active">
+        <span class="nav-icon">👥</span>
+        Manage Drivers
+      </a>
+      <a href="/all-buses.html" class="nav-item">
+        <span class="nav-icon">🚍</span>
+        All Buses
+      </a>
+      <a href="/live-tracking.html" class="nav-item">
+        <span class="nav-icon">📍</span>
+        Live Tracking
+      </a>
+    </nav>
+  </div>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Manage Drivers</h1>
+      <div id="adminInfo" class="muted"></div>
+    </div>
+
+    <section class="card add-driver-card">
+      <div class="card-header">
+        <h3>Add New Driver</h3>
+        <span class="nav-icon">👥</span>
+      </div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="drv_name">Driver Name</label>
+          <input id="drv_name" placeholder="Enter full name" />
+        </div>
+        <div class="form-group">
+          <label for="drv_contact">Contact Information</label>
+          <input id="drv_contact" placeholder="Phone number or email" />
+        </div>
+        <div class="form-group">
+          <label for="drv_busid">Bus Assignment</label>
+          <input id="drv_busid" placeholder="Assigned Bus ID (optional)" />
+        </div>
+        <div class="form-group">
+          <label for="drv_invite">Invitation Code</label>
+          <input id="drv_invite" placeholder="Leave blank to auto-generate" />
+        </div>
+      </div>
+      <div class="form-actions">
+        <button id="addDriverBtn" class="btn primary">
+          <span class="btn-icon">➕</span>
+          Add Driver
+        </button>
+        <button id="clearDriverBtn" class="btn muted">
+          <span class="btn-icon">🔄</span>
+          Clear Form
+        </button>
+      </div>
+    </section>
+
+    <section class="card drivers-list-card">
+      <div class="card-header">
+        <h3>Active Drivers</h3>
+        <div class="card-actions">
+          <button class="btn muted">
+            <span class="btn-icon">🔄</span>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div class="drivers-grid" id="driversList">
+        <!-- Sample driver card (will be replaced by dynamic content) -->
+        <div class="driver-card">
+          <div class="driver-header">
+            <div class="driver-info">
+              <div class="driver-name">John Doe</div>
+              <div class="driver-contact">+1 234-567-8900</div>
+            </div>
+            <div class="driver-status active">On Duty</div>
+          </div>
+          <div class="driver-details">
+            <div class="detail-item">
+              <span class="detail-label">Bus Assigned</span>
+              <span class="detail-value">Bus #1234</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Last Active</span>
+              <span class="detail-value">2 mins ago</span>
+            </div>
+          </div>
+          <div class="driver-actions">
+            <button class="btn muted small">Edit</button>
+            <button class="btn muted small">Remove</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { auth, db } from "./js/firebaseConfig.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js";
+    import {
+      collection,
+      addDoc,
+      doc,
+      onSnapshot,
+      query,
+      orderBy,
+      serverTimestamp,
+      updateDoc,
+      deleteDoc,
+      getDoc
+    } from "https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js";
+
+    function $(id) { return document.getElementById(id); }
+
+    // Format timestamp to relative time
+    function formatRelativeTime(timestamp) {
+      if (!timestamp) return '-';
+      const now = new Date();
+      const date = new Date(timestamp.toMillis());
+      const diff = Math.floor((now - date) / 1000);
+
+      if (diff < 60) return 'just now';
+      if (diff < 3600) return Math.floor(diff / 60) + ' mins ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + ' hours ago';
+      return date.toLocaleDateString();
+    }
+
+    // Create driver card element
+    function createDriverCard(id, data) {
+      const card = document.createElement('div');
+      card.className = 'driver-card';
+      card.innerHTML = `
+        <div class="driver-header">
+          <div class="driver-info">
+            <div class="driver-name">${data.fullName || '(No name)'}</div>
+            <div class="driver-contact">${data.contact || 'No contact info'}</div>
+          </div>
+          <div class="driver-status ${data.isActive ? 'active' : ''}">${data.isActive ? 'On Duty' : 'Off Duty'}</div>
+        </div>
+        <div class="driver-details">
+          <div class="detail-item">
+            <span class="detail-label">Bus Assigned</span>
+            <span class="detail-value">${data.busId || 'Unassigned'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Invite Code</span>
+            <span class="detail-value">${data.inviteCode || '-'}</span>
+          </div>
+          <div class="detail-item">
+            <span class="detail-label">Last Active</span>
+            <span class="detail-value">${formatRelativeTime(data.lastActive || data.createdAt)}</span>
+          </div>
+        </div>
+        <div class="driver-actions">
+          <button class="btn secondary small edit-btn" data-id="${id}">
+            <span class="btn-icon">✏️</span>
+            Edit
+          </button>
+          <button class="btn secondary small del-btn" data-id="${id}">
+            <span class="btn-icon">🗑️</span>
+            Remove
+          </button>
+        </div>
+      `;
+      return card;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const addBtn = $("addDriverBtn");
+      const clearBtn = $("clearDriverBtn");
+      const nameInput = $("drv_name");
+      const contactInput = $("drv_contact");
+      const busInput = $("drv_busid");
+      const inviteInput = $("drv_invite");
+      const listDiv = $("driversList");
+      const infoDiv = $("adminInfo");
+      let unsubscribe = null;
+
+      // Show/Hide loading animation
+      const showLoading = () => {
+        const loader = document.querySelector('.loading');
+        if (loader) loader.style.display = 'block';
+      };
+
+      const hideLoading = () => {
+        const loader = document.querySelector('.loading');
+        if (loader) loader.style.display = 'none';
+      };
+
+      // Generate invite code
+      function generateInviteCode() {
+        return 'DRV' + Math.random().toString(36).slice(2,8).toUpperCase();
+      }
+
+      // Subscribe to drivers collection
+      function subscribeToDrivers() {
+        if (unsubscribe) unsubscribe();
+        
+        showLoading();
+        const q = query(collection(db, "drivers"), orderBy("createdAt", "desc"));
+        unsubscribe = onSnapshot(q, (snap) => {
+          hideLoading();
+          listDiv.innerHTML = "";
+          
+          if (snap.empty) {
+            listDiv.innerHTML = `
+              <div class="empty-state">
+                <p>No drivers registered yet.</p>
+              </div>
+            `;
+            return;
+          }
+
+          snap.docs.forEach(doc => {
+            const data = doc.data();
+            const card = createDriverCard(doc.id, data);
+            listDiv.appendChild(card);
+          });
+
+          // Add event listeners to buttons
+          setupButtonListeners();
+        }, (error) => {
+          console.error("Error fetching drivers:", error);
+          hideLoading();
+          listDiv.innerHTML = `
+            <div class="error-state">
+              <p>Error loading drivers. Please try again.</p>
+            </div>
+          `;
+        });
+      }
+
+      // Setup button event listeners
+      function setupButtonListeners() {
+        // Delete buttons
+        listDiv.querySelectorAll(".del-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            if (!confirm(`Are you sure you want to remove this driver?`)) return;
+            
+            try {
+              showLoading();
+              await deleteDoc(doc(db, "drivers", id));
+              hideLoading();
+              alert("Driver removed successfully");
+            } catch (error) {
+              console.error("Error deleting driver:", error);
+              hideLoading();
+              alert("Failed to delete driver. Please try again.");
+            }
+          };
+        });
+
+        // Edit buttons
+        listDiv.querySelectorAll(".edit-btn").forEach(btn => {
+          btn.onclick = async () => {
+            const id = btn.dataset.id;
+            try {
+              showLoading();
+              const driverDoc = await getDoc(doc(db, "drivers", id));
+              hideLoading();
+              
+              if (driverDoc.exists()) {
+                const data = driverDoc.data();
+                nameInput.value = data.fullName || '';
+                contactInput.value = data.contact || '';
+                busInput.value = data.busId || '';
+                inviteInput.value = data.inviteCode || '';
+                
+                // Change button text and store driver ID
+                addBtn.textContent = '💾 Update Driver';
+                addBtn.dataset.driverId = id;
+                
+                // Scroll to form
+                document.querySelector('.add-driver-card').scrollIntoView({ behavior: 'smooth' });
+              }
+            } catch (error) {
+              console.error("Error fetching driver details:", error);
+              hideLoading();
+              alert("Failed to load driver details. Please try again.");
+            }
+          };
+        });
+      }
+
+      // Add/Update driver
+      addBtn.addEventListener("click", async () => {
+        const name = nameInput.value.trim();
+        const contact = contactInput.value.trim();
+        const busId = busInput.value.trim();
+        let invite = inviteInput.value.trim();
+
+        if (!name) {
+          alert("Please enter driver name");
+          return;
+        }
+
+        if (!invite) invite = generateInviteCode();
+
+        try {
+          showLoading();
+          const payload = {
+            fullName: name,
+            contact: contact || null,
+            busId: busId || null,
+            inviteCode: invite,
+            updatedAt: serverTimestamp()
+          };
+
+          if (addBtn.dataset.driverId) {
+            // Update existing driver
+            await updateDoc(doc(db, "drivers", addBtn.dataset.driverId), payload);
+            delete addBtn.dataset.driverId;
+            addBtn.textContent = '➕ Add Driver';
+          } else {
+            // Add new driver
+            payload.createdAt = serverTimestamp();
+            payload.isActive = false;
+            await addDoc(collection(db, "drivers"), payload);
+          }
+
+          hideLoading();
+          clearBtn.click();
+          alert(addBtn.dataset.driverId ? "Driver updated successfully!" : "Driver added successfully!");
+        } catch (error) {
+          console.error("Error saving driver:", error);
+          hideLoading();
+          alert("Failed to save driver. Please try again.");
+        }
+      });
+
+      // Clear form
+      clearBtn.addEventListener("click", () => {
+        nameInput.value = "";
+        contactInput.value = "";
+        busInput.value = "";
+        inviteInput.value = "";
+        addBtn.textContent = '➕ Add Driver';
+        delete addBtn.dataset.driverId;
+      });
+
+      // Refresh drivers list
+      document.querySelector('.card-actions .btn').addEventListener('click', () => {
+        subscribeToDrivers();
+      });
+
+      // Enhanced Mobile Navigation Setup
+      function setupMobileNavigation() {
+        const navToggle = document.getElementById('navToggle');
+        const sidebar = document.getElementById('sidebar');
+        const closeNav = document.getElementById('closeNav');
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+
+        function toggleSidebar() {
+          sidebar.classList.toggle('active');
+          document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';
+        }
+
+        // Toggle menu
+        navToggle.addEventListener('click', toggleSidebar);
+        closeNav.addEventListener('click', toggleSidebar);
+        overlay.addEventListener('click', toggleSidebar);
+
+        // Swipe handling
+        document.addEventListener('touchstart', (e) => {
+          touchStartX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+          touchEndX = e.changedTouches[0].clientX;
+          handleSwipe();
+        });
+
+        function handleSwipe() {
+          const swipeDistance = touchEndX - touchStartX;
+          const threshold = 100;
+
+          if (Math.abs(swipeDistance) >= threshold) {
+            if (swipeDistance > 0 && touchStartX < 50) {
+              if (!sidebar.classList.contains('active')) {
+                toggleSidebar();
+              }
+            } else if (swipeDistance < 0 && sidebar.classList.contains('active')) {
+              toggleSidebar();
+            }
+          }
+        }
+
+        // Close menu on resize if screen becomes large
+        let lastWidth = window.innerWidth;
+        window.addEventListener('resize', () => {
+          if (window.innerWidth !== lastWidth) {
+            lastWidth = window.innerWidth;
+            if (window.innerWidth > 768) {
+              sidebar.classList.remove('active');
+              document.body.style.overflow = '';
+            }
+          }
+        });
+      }
+
+      // Initialize mobile navigation
+      setupMobileNavigation();
+
+      // Check authentication and initialize
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = "/login.html";
+          return;
+        }
+        infoDiv.textContent = `Signed in as ${user.email}`;
+        subscribeToDrivers();
+      });
+    });
+  </script>
+</body>
+</html>

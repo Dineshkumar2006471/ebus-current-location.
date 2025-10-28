@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="40" height="40" rx="8" fill="url(#gradient)"/>
+    <path d="M10 25V15C10 12.2386 12.2386 10 15 10H25C27.7614 10 30 12.2386 30 15V25C30 27.7614 27.7614 30 25 30H15C12.2386 30 10 27.7614 10 25Z" fill="white"/>
+    <path d="M15 22H25M15 18H25" stroke="#0ea5e9" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="15" cy="26" r="2" fill="#0ea5e9"/>
+    <circle cx="25" cy="26" r="2" fill="#0ea5e9"/>
+    <defs>
+        <linearGradient id="gradient" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#0ea5e9"/>
+            <stop offset="1" stop-color="#8b5cf6"/>
+        </linearGradient>
+    </defs>
+</svg>

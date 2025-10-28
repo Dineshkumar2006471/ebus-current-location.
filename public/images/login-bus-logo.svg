@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle with Gradient -->
+    <circle cx="100" cy="100" r="100" fill="url(#circleGradient)"/>
+    
+    <!-- Bus Body - More Modern Design -->
+    <path d="M40 70C40 60 50 50 60 50H140C150 50 160 60 160 70V130C160 140 150 150 140 150H60C50 150 40 140 40 130V70Z" fill="white"/>
+    
+    <!-- Windows - Modern Style -->
+    <path d="M55 70H75V90H55V70Z" fill="#0ea5e9" fill-opacity="0.9"/>
+    <path d="M85 70H105V90H85V70Z" fill="#0ea5e9" fill-opacity="0.9"/>
+    <path d="M115 70H135V90H115V70Z" fill="#0ea5e9" fill-opacity="0.9"/>
+    
+    <!-- Front Details -->
+    <path d="M40 100H160" stroke="#0ea5e9" stroke-width="2"/>
+    <circle cx="150" cy="110" r="4" fill="#FFD700"/> <!-- Front Light -->
+    
+    <!-- Wheels with Modern Details -->
+    <g filter="url(#wheelShadow)">
+        <circle cx="70" cy="150" r="15" fill="#333"/>
+        <circle cx="70" cy="150" r="8" fill="#666"/>
+        <circle cx="70" cy="150" r="3" fill="#999"/>
+    </g>
+    <g filter="url(#wheelShadow)">
+        <circle cx="130" cy="150" r="15" fill="#333"/>
+        <circle cx="130" cy="150" r="8" fill="#666"/>
+        <circle cx="130" cy="150" r="3" fill="#999"/>
+    </g>
+    
+    <!-- Door with Modern Design -->
+    <path d="M90 105H110V135H90V105Z" fill="#0ea5e9" fill-opacity="0.9"/>
+    <path d="M100 105V135" stroke="white" stroke-width="1"/>
+    
+    <!-- Reflections -->
+    <path d="M45 60C45 55 50 52 55 52H145C150 52 155 55 155 60" stroke="white" stroke-opacity="0.5" stroke-width="2"/>
+    
+    <!-- Definitions -->
+    <defs>
+        <!-- Main Gradient -->
+        <linearGradient id="circleGradient" x1="0" y1="0" x2="200" y2="200" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#0ea5e9"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+        
+        <!-- Wheel Shadow -->
+        <filter id="wheelShadow" x="-4" y="-4" width="220" height="220" filterUnits="userSpaceOnUse">
+            <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#000000" flood-opacity="0.3"/>
+        </filter>
+        
+        <!-- Glass Reflection -->
+        <linearGradient id="glassGradient" x1="40" y1="50" x2="160" y2="150" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="white" stop-opacity="0.2"/>
+            <stop offset="100%" stop-color="white" stop-opacity="0"/>
+        </linearGradient>
+    </defs>
+    
+    <!-- Overlay Glass Effect -->
+    <path d="M40 70C40 60 50 50 60 50H140C150 50 160 60 160 70V130C160 140 150 150 140 150H60C50 150 40 140 40 130V70Z" fill="url(#glassGradient)"/>
+</svg>

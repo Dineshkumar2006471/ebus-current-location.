@@ -1,0 +1,149 @@
+/* public/css/login.css */
+* {
+    box-sizing: border-box
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg, #f8fbff, #f6fbff);
+    color: #08142a
+}
+
+.login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px
+}
+
+.card {
+    width: 380px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 30px;
+    box-shadow: 0 12px 30px rgba(10, 20, 40, 0.08);
+    text-align: center;
+    position: relative
+}
+
+.logo-circle {
+    width: 86px;
+    height: 86px;
+    border-radius: 50%;
+    background: #fff;
+    margin: -60px auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 10px 20px rgba(2, 6, 23, 0.04)
+}
+
+.logo-circle img {
+    width: 56px;
+    height: 56px
+}
+
+.title {
+    font-size: 22px;
+    margin: 8px 0 6px
+}
+
+.subtitle {
+    color: #6b7280;
+    margin: 0 0 18px
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600
+}
+
+.btn.google {
+    width: 100%;
+    border: 1px solid #e6eef6;
+    background: #fff
+}
+
+.btn.google img {
+    width: 18px;
+    height: 18px
+}
+
+.btn.primary {
+    width: 100%;
+    background: #0b1220;
+    color: #fff;
+    margin-top: 12px;
+    border-radius: 12px;
+    padding: 12px
+}
+
+.divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 16px 0;
+    color: #8b94a6
+}
+
+.divider::before,
+.divider::after {
+    content: "";
+    height: 1px;
+    background: #eef2ff;
+    flex: 1
+}
+
+.label {
+    display: block;
+    text-align: left;
+    color: #6b7280;
+    margin: 8px 0 6px;
+    padding-left: 4px;
+    font-size: 13px
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #e6eef6;
+    background: #fff;
+    outline: none;
+    font-size: 14px
+}
+
+.row.small {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px
+}
+
+.muted {
+    color: #6b7280;
+    text-decoration: none;
+    font-size: 13px
+}
+
+.status {
+    margin-top: 10px;
+    color: #ef4444;
+    font-size: 13px
+}
+
+@media (max-width:420px) {
+    .card {
+        width: 95%
+    }
+}

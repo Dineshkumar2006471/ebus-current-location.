@@ -1,0 +1,439 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Live Tracking</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/mobile.css">
+  <style>
+    :root {
+      /* Color tokens */
+      --bg1: #0f172a;
+      --accent1: #0ea5e9;
+      --accent2: #8b5cf6;
+      --muted: #94a3b8;
+      --glass: rgba(255,255,255,0.08);
+      --glass-strong: rgba(255,255,255,0.12);
+      --shadow: 0 8px 32px rgba(0,0,0,0.2);
+      /* New navigation variables */
+      --nav-height: 4rem;
+      --nav-bg: rgba(15, 23, 42, 0.98);
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: radial-gradient(circle at 0% 0%, rgba(14,165,233,0.15), transparent 50%),
+                  radial-gradient(circle at 100% 100%, rgba(139,92,246,0.15), transparent 50%),
+                  var(--bg1);
+      color: white;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* Updated Sidebar Styles */
+    .sidebar {
+      width: 280px;
+      background: var(--nav-bg);
+      backdrop-filter: blur(12px);
+      padding: 0;
+      position: fixed;
+      height: 100vh;
+      color: white;
+      border-right: 1px solid var(--glass);
+      z-index: 1000;
+      transition: transform 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Logo Container Styles */
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--glass);
+    }
+
+    .logo-img {
+      width: 40px;
+      height: 40px;
+      object-fit: contain;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .logo-text h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .logo-text .subtitle {
+      font-size: 0.875rem;
+      color: var(--muted);
+    }
+
+    .sidebar nav {
+      padding: 0 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+    }
+
+    .sidebar nav a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 1rem 1.25rem;
+      border-radius: 12px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    .sidebar nav a::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 4px;
+      height: 0;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      border-radius: 0 4px 4px 0;
+      transition: height 0.3s ease;
+    }
+
+    .sidebar nav a:hover {
+      background: var(--glass);
+      color: white;
+    }
+
+    .sidebar nav a:hover::before {
+      height: 70%;
+    }
+
+    .sidebar nav a.active {
+      color: white;
+      background: var(--glass);
+    }
+
+    .sidebar nav a.active::before {
+      height: 70%;
+    }
+
+    /* New Mobile Navigation Toggle */
+    .nav-toggle {
+      display: none;
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 1001;
+      background: var(--glass);
+      border: none;
+      color: white;
+      padding: 0.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    /* Updated Main Content */
+    .main {
+      flex: 1;
+      margin-left: 280px;
+      padding: 2rem;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .main header {
+      margin-bottom: 2rem;
+    }
+
+    .main header h1 {
+      margin: 0;
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent1), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .main header h1::before {
+      content: '📍';
+      font-size: 1.75rem;
+    }
+
+    .card {
+      background: var(--glass-strong);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+    }
+
+    #map {
+      height: calc(100vh - 180px);
+      border-radius: 16px;
+      border: 1px solid var(--glass);
+      box-shadow: var(--shadow);
+      transition: all 0.3s ease;
+    }
+
+    #map:hover {
+      border-color: var(--glass-strong);
+      box-shadow: var(--shadow), 0 0 30px rgba(14,165,233,0.1);
+    }
+
+    @media (max-width: 1024px) {
+      .main {
+        padding: 1.5rem;
+      }
+
+      #map {
+        height: calc(100vh - 150px);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .nav-toggle {
+        display: block;
+      }
+
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .main {
+        margin-left: 0;
+        padding: 1rem;
+      }
+
+      #map {
+        height: calc(100vh - 120px);
+        border-radius: 12px;
+      }
+
+      header h1 {
+        font-size: 1.75rem;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      /* Improve touch targets */
+      .nav a {
+        padding: 1rem;
+        min-height: 44px;
+      }
+
+      .nav-toggle {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      header h1 {
+        font-size: 1.5rem;
+      }
+
+      .main {
+        padding: 0.75rem;
+      }
+
+      #map {
+        height: calc(100vh - 100px);
+        border-radius: 8px;
+      }
+
+      .card {
+        padding: 0.75rem;
+      }
+    }
+
+    /* Add icons to navigation */
+    .nav-icon {
+      font-size: 1.25rem;
+      opacity: 0.8;
+    }
+
+    /* Animation for active link indicator */
+    @keyframes slideIn {
+      from { transform: translateX(-100%); }
+      to { transform: translateX(0); }
+    }
+  </style>
+</head>
+<body>
+  <button class="nav-toggle" id="navToggle">☰</button>
+  <div class="sidebar" id="sidebar">
+    <div class="logo-container">
+      <img src="/images/ebus-logo.svg" alt="E-Bus" class="logo-img">
+      <div class="logo-text">
+        <h2>E-Bus Manager</h2>
+        <span class="subtitle">Live Tracking</span>
+      </div>
+    </div>
+    <nav>
+      <a href="/admin.html">
+        <span class="nav-icon">📊</span>
+        Dashboard
+      </a>
+      <a href="/manage-drivers.html">
+        <span class="nav-icon">👥</span>
+        Manage Drivers
+      </a>
+      <a href="/all-buses.html">
+        <span class="nav-icon">🚍</span>
+        All Buses
+      </a>
+      <a href="/live-tracking.html" class="active">
+        <span class="nav-icon">📍</span>
+        Live Tracking
+      </a>
+    </nav>
+  </div>
+
+  <main class="main">
+    <header><h1>Live Tracking</h1></header>
+    <section class="card">
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/live-tracking.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Enhanced Mobile Navigation
+    const navToggle = document.getElementById('navToggle');
+    const sidebar = document.getElementById('sidebar');
+    const main = document.querySelector('.main');
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    // Toggle menu with overlay
+    navToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleSidebar();
+    });
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('active');
+      if (sidebar.classList.contains('active')) {
+        addOverlay();
+      } else {
+        removeOverlay();
+      }
+    }
+
+    // Create and manage overlay
+    function addOverlay() {
+      if (!document.querySelector('.sidebar-overlay')) {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        overlay.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          z-index: 999;
+          opacity: 0;
+          transition: opacity 0.3s ease;
+          backdrop-filter: blur(4px);
+        `;
+        document.body.appendChild(overlay);
+        // Force reflow
+        overlay.offsetHeight;
+        overlay.style.opacity = '1';
+        
+        overlay.addEventListener('click', () => {
+          toggleSidebar();
+        });
+      }
+    }
+
+    function removeOverlay() {
+      const overlay = document.querySelector('.sidebar-overlay');
+      if (overlay) {
+        overlay.style.opacity = '0';
+        overlay.addEventListener('transitionend', () => {
+          overlay.remove();
+        }, { once: true });
+      }
+    }
+
+    // Swipe to open/close menu
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+    }, false);
+
+    document.addEventListener('touchend', (e) => {
+      touchEndX = e.changedTouches[0].clientX;
+      handleSwipe();
+    }, false);
+
+    function handleSwipe() {
+      const swipeDistance = touchEndX - touchStartX;
+      const threshold = 100;
+
+      if (Math.abs(swipeDistance) >= threshold) {
+        if (swipeDistance > 0 && touchStartX < 50 && !sidebar.classList.contains('active')) {
+          toggleSidebar();
+        } else if (swipeDistance < 0 && sidebar.classList.contains('active')) {
+          toggleSidebar();
+        }
+      }
+    }
+
+    // Close menu on resize
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        if (window.innerWidth > 768) {
+          sidebar.classList.remove('active');
+          removeOverlay();
+        }
+      }
+    });
+
+    // Prevent scrolling on menu
+    sidebar.addEventListener('touchmove', (e) => {
+      if (window.innerWidth <= 768) {
+        e.preventDefault();
+      }
+    }, { passive: false });
+  </script>
+</body>
+</html>

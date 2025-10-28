@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Background Circle with Gradient -->
+    <circle cx="60" cy="60" r="60" fill="url(#circleGradient)"/>
+    
+    <!-- Bus Body -->
+    <path d="M25 45C25 40 30 35 35 35H85C90 35 95 40 95 45V75C95 80 90 85 85 85H35C30 85 25 80 25 75V45Z" fill="white"/>
+    
+    <!-- Windows -->
+    <path d="M35 45H45V55H35V45Z" fill="#0ea5e9"/>
+    <path d="M50 45H60V55H50V45Z" fill="#0ea5e9"/>
+    <path d="M65 45H75V55H65V45Z" fill="#0ea5e9"/>
+    <path d="M80 45H85C87 45 90 47 90 50V55H80V45Z" fill="#0ea5e9"/>
+    <path d="M30 45V55H35V45H32C31 45 30 45 30 45Z" fill="#0ea5e9"/>
+    
+    <!-- Front Light -->
+    <circle cx="90" cy="65" r="2" fill="#FFD700"/>
+    
+    <!-- Wheels -->
+    <circle cx="40" cy="85" r="8" fill="#333"/>
+    <circle cx="40" cy="85" r="4" fill="#666"/>
+    <circle cx="80" cy="85" r="8" fill="#333"/>
+    <circle cx="80" cy="85" r="4" fill="#666"/>
+    
+    <!-- Door -->
+    <path d="M55 65H65V80H55V65Z" fill="#0ea5e9"/>
+    
+    <!-- Gradient Definition -->
+    <defs>
+        <linearGradient id="circleGradient" x1="0" y1="0" x2="120" y2="120" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#0ea5e9"/>
+            <stop offset="100%" stop-color="#8b5cf6"/>
+        </linearGradient>
+    </defs>
+</svg>
